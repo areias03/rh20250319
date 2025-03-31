@@ -1,0 +1,66 @@
+---
+title: "Introduction to Metabolic Modelling"
+author: "Alexandre Areias Castro"
+jupyter: "mtgw"
+engine: "knitr"
+---
+
+***
+In this tutorial:
+
+- You will learn several concepts and methods within metabolic modelling, including:
+    - Network reconstruction;
+    - Single-model simulations and extensions;
+    - Community modelling.
+- Use different tools and methodologies for each step;
+- Make changes or add lines to existing code to observe changes in results. Use this as a sandbox and <u>explore</u>!
+
+```{python}
+
+import pandas as pd
+import micom
+import reframed
+
+import os
+import sys
+
+sys.prefix
+
+```
+
+## Reconstruction and model building
+
+In this part:
+
+- How a metabolic model originates from a genome;
+- The main types of reconstruction;
+- What tools to use.
+
+***
+
+According to ChatGPT, metabolic network reconstruction is:
+
+"(...)a process where the complete set of metabolic reactions and pathways in a microorganism, tissue, or organism are reconstructed and represented in a computational model based on its genomic data. This model provides a comprehensive framework for understanding the organism's metabolic network and can be used to simulate its behavior under various conditions."
+
+This is a fairly accurate answer. Now, let's look at how we can *actually* do this.
+
+### 1 - Introduction
+
+Metabolic reconstructions are achieved through essentially mapping genes, reactions and metabolites into one cohesive and interconnected network. In practical terms, it requires us to obtain as much information from the genomic data so that tghrough it, we can get which reactions are related to each of the genes present in the genome. The way we obtain this information is accomplised using 2 main approaches:
+
+- Bottom-up
+- Top-down
+
+Bottom-up approaches are the most common and most used reconstruction methodologies. They are comprised of a mapping of the genes to some sort of annotation/database that extracts the proteins and reactions they mediate/catalyze. Afterwards, they connect all the available reactions and establish a "mock-up" metabolic network (also known as a scaffold) and afterwards are curated to cover any missing reactions to the pathways. Generally speaking, they are extremely good for generating models in a manual/semi-automated way, but the more you automate them, the more the models tend to lose **quality**. If you want to maintain quality, the ammount of work needed to curate and fill the gaps exponentially increases. Examples of tools: [ModelSEED](https://academic.oup.com/nar/article/49/D1/D575/5912569?login=false), [merlin](https://academic.oup.com/nar/article/50/11/6052/6606174) and [gapseq](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-021-02295-1) (for gap-filling).
+
+On the other hand, top-down reconstructions use the the scaffolds generated in the first step and then compare them against a universal or complete model with all the available reactions in every pathway from a database and then extract the pathways they have. This methodology is much more effecient in generating larfge numbers of models without compromising on quality and needing manual curation, but bad for generating models for *de novo* genomes. One example of tools that utilize this approach is [CarveMe](https://pubmed.ncbi.nlm.nih.gov/30192979/).
+
+![carve](gky537fig1.jpg)
+
+**Source:** D. Machado et al, "Fast automated reconstruction of genome-scale metabolic models for microbial species and communities", Nucleic Acids Research, gky537, 2018. doi: https://doi.org/10.1093/nar/gky537
+
+```{bash}
+
+carve -h
+
+```
