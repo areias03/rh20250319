@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.33">
+<meta name="generator" content="quarto-1.6.42">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -64,10 +64,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="tutorial_files/libs/quarto-html/tippy.umd.min.js"></script>
 <script src="tutorial_files/libs/quarto-html/anchor.min.js"></script>
 <link href="tutorial_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="tutorial_files/libs/quarto-html/quarto-syntax-highlighting-07ba0ad10f5680c660e360ac31d2f3b6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="tutorial_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="tutorial_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="tutorial_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="tutorial_files/libs/bootstrap/bootstrap-259774255ac2a443082c2b3900e65cb9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="tutorial_files/libs/bootstrap/bootstrap-c0367b04c37547644fece4185067e4a7.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 
 
 </head>
@@ -115,7 +115,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Use different tools and methodologies for each step;</li>
 <li>Make changes or add lines to existing code to observe changes in results. Use this as a sandbox and <u>explore</u>!</li>
 </ul>
-<div class="cell">
+<div id="29d67606" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> micom</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> reframed</span>
@@ -124,8 +124,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>sys.prefix</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>'/home/alexandre/miniconda3/envs/mtgw'</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>'/Users/alexandre/miniforge3/envs/mmtk'</code></pre>
 </div>
 </div>
 <section id="reconstruction-and-model-building" class="level2">
@@ -149,60 +149,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p>Bottom-up approaches are the most common and most used reconstruction methodologies. They are comprised of a mapping of the genes to some sort of annotation/database that extracts the proteins and reactions they mediate/catalyze. Afterwards, they connect all the available reactions and establish a “mock-up” metabolic network (also known as a scaffold) and afterwards are curated to cover any missing reactions to the pathways. Generally speaking, they are extremely good for generating models in a manual/semi-automated way, but the more you automate them, the more the models tend to lose <strong>quality</strong>. If you want to maintain quality, the ammount of work needed to curate and fill the gaps exponentially increases. Examples of tools: <a href="https://academic.oup.com/nar/article/49/D1/D575/5912569?login=false">ModelSEED</a>, <a href="https://academic.oup.com/nar/article/50/11/6052/6606174">merlin</a> and <a href="https://genomebiology.biomedcentral.com/articles/10.1186/s13059-021-02295-1">gapseq</a> (for gap-filling).</p>
 <p>On the other hand, top-down reconstructions use the the scaffolds generated in the first step and then compare them against a universal or complete model with all the available reactions in every pathway from a database and then extract the pathways they have. This methodology is much more effecient in generating larfge numbers of models without compromising on quality and needing manual curation, but bad for generating models for <em>de novo</em> genomes. One example of tools that utilize this approach is <a href="https://pubmed.ncbi.nlm.nih.gov/30192979/">CarveMe</a>.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="gky537fig1.jpg" class="img-fluid figure-img"></p>
-<figcaption>carve</figcaption>
-</figure>
-</div>
+<p><img src="gky537fig1.jpg" class="img-fluid"></p>
 <p><strong>Source:</strong> D. Machado et al, “Fast automated reconstruction of genome-scale metabolic models for microbial species and communities”, Nucleic Acids Research, gky537, 2018. doi: https://doi.org/10.1093/nar/gky537</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">carve</span> <span class="at">-h</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="c2c8e80d" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>carve <span class="op">-</span>h</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>usage: carve [-h] [--dna | --egg | --refseq] [--diamond-args DIAMOND_ARGS]
-             [-r] [-o OUTPUT] [-u UNIVERSE | --universe-file UNIVERSE_FILE]
-             [--cobra | --fbc2] [-n ENSEMBLE] [-g GAPFILL] [-i INIT]
-             [--mediadb MEDIADB] [-v] [-d] [--soft SOFT] [--hard HARD]
-             [--reference REFERENCE] [--solver SOLVER]
-             INPUT [INPUT ...]
-
-Reconstruct a metabolic model using CarveMe
-
-positional arguments:
-  INPUT                 Input (protein fasta file by default, see other options for details).
-                        When used with -r an input pattern with wildcards can also be used.
-                        When used with --refseq an NCBI RefSeq assembly accession is expected.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --dna                 Build from DNA fasta file
-  --egg                 Build from eggNOG-mapper output file
-  --refseq              Download genome from NCBI RefSeq and build
-  --diamond-args DIAMOND_ARGS
-                        Additional arguments for running diamond
-  -r, --recursive       Bulk reconstruction from folder with genome files
-  -o OUTPUT, --output OUTPUT
-                        SBML output file (or output folder if -r is used)
-  -u UNIVERSE, --universe UNIVERSE
-                        Pre-built universe model (default: bacteria)
-  --universe-file UNIVERSE_FILE
-                        Reaction universe file (SBML format)
-  --cobra               Output SBML in old cobra format
-  --fbc2                Output SBML in sbml-fbc2 format
-  -n ENSEMBLE, --ensemble ENSEMBLE
-                        Build model ensemble with N models
-  -g GAPFILL, --gapfill GAPFILL
-                        Gap fill model for given media
-  -i INIT, --init INIT  Initialize model with given medium
-  --mediadb MEDIADB     Media database file
-  -v, --verbose         Switch to verbose mode
-  -d, --debug           Debug mode: writes intermediate results into output files
-  --soft SOFT           Soft constraints file
-  --hard HARD           Hard constraints file
-  --reference REFERENCE
-                        Manually curated model of a close reference species.
-  --solver SOLVER       Select MILP solver. Available options: cplex [default], gurobi.</code></pre>
+<pre><code>fish: Unknown command: carve
+fish: 
+carve -h
+^~~~^</code></pre>
 </div>
 </div>
 </section>
@@ -292,8 +247,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   });
   clipboard.on('success', onCopySuccess);
   if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    // For code content inside modals, clipBoardJS needs to be initialized with a container option
-    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
     const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
       text: getTextToCopy,
       container: window.document.getElementById('quarto-embedded-source-code-modal')
@@ -404,7 +357,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(note);
       }
-      // TODO in 1.5, we should make sure this works without a callout special case
       if (note.classList.contains("callout")) {
         return note.outerHTML;
       } else {

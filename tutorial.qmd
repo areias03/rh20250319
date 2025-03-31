@@ -1,8 +1,6 @@
 ---
 title: "Introduction to Metabolic Modelling"
 author: "Alexandre Areias Castro"
-jupyter: "mtgw"
-engine: "knitr"
 ---
 
 ***
@@ -55,12 +53,12 @@ Bottom-up approaches are the most common and most used reconstruction methodolog
 
 On the other hand, top-down reconstructions use the the scaffolds generated in the first step and then compare them against a universal or complete model with all the available reactions in every pathway from a database and then extract the pathways they have. This methodology is much more effecient in generating larfge numbers of models without compromising on quality and needing manual curation, but bad for generating models for *de novo* genomes. One example of tools that utilize this approach is [CarveMe](https://pubmed.ncbi.nlm.nih.gov/30192979/).
 
-![carve](gky537fig1.jpg)
+![](gky537fig1.jpg)
 
 **Source:** D. Machado et al, "Fast automated reconstruction of genome-scale metabolic models for microbial species and communities", Nucleic Acids Research, gky537, 2018. doi: https://doi.org/10.1093/nar/gky537
 
-```{bash}
+```{python}
 
-carve -h
+!carve -h
 
 ```
