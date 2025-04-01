@@ -1,6 +1,10 @@
 ---
 title: "Introduction to Metabolic Modelling"
+subtitle: "Centre for Microbiome Research - Queensland University of Technology"
 author: "Alexandre Areias Castro"
+toc: true
+bibliography: bibliography.bib
+csl: https://www.zotero.org/styles/taylor-and-francis-national-library-of-medicine
 ---
 
 ***
@@ -19,14 +23,9 @@ import pandas as pd
 import micom
 import reframed
 
-import os
-import sys
-
-sys.prefix
-
 ```
 
-## Reconstruction and model building
+# Reconstruction and model building
 
 In this part:
 
@@ -38,27 +37,318 @@ In this part:
 
 According to ChatGPT, metabolic network reconstruction is:
 
-"(...)a process where the complete set of metabolic reactions and pathways in a microorganism, tissue, or organism are reconstructed and represented in a computational model based on its genomic data. This model provides a comprehensive framework for understanding the organism's metabolic network and can be used to simulate its behavior under various conditions."
+"(...)a process where the complete set of metabolic reactions and pathways
+in a microorganism, tissue, or organism are reconstructed and represented
+in a computational model based on its genomic data. This model provides a
+comprehensive framework for understanding the organism's metabolic network and
+can be used to simulate its behavior under various conditions."
 
 This is a fairly accurate answer. Now, let's look at how we can *actually* do this.
 
-### 1 - Introduction
+## 1 - Introduction
 
-Metabolic reconstructions are achieved through essentially mapping genes, reactions and metabolites into one cohesive and interconnected network. In practical terms, it requires us to obtain as much information from the genomic data so that tghrough it, we can get which reactions are related to each of the genes present in the genome. The way we obtain this information is accomplised using 2 main approaches:
+Metabolic reconstructions are achieved through essentially mapping genes,
+reactions and metabolites into one cohesive and interconnected network known
+as a **Genome-Scale Metabolic Model (GEM)**. In practical terms, it requires us to
+obtain as much information from the genomic data so that through it, we can know
+which reactions are related to each of the genes present in the genome. The way
+we obtain this information is accomplised using 2 main approaches:
 
 - Bottom-up
 - Top-down
 
-Bottom-up approaches are the most common and most used reconstruction methodologies. They are comprised of a mapping of the genes to some sort of annotation/database that extracts the proteins and reactions they mediate/catalyze. Afterwards, they connect all the available reactions and establish a "mock-up" metabolic network (also known as a scaffold) and afterwards are curated to cover any missing reactions to the pathways. Generally speaking, they are extremely good for generating models in a manual/semi-automated way, but the more you automate them, the more the models tend to lose **quality**. If you want to maintain quality, the ammount of work needed to curate and fill the gaps exponentially increases. Examples of tools: [ModelSEED](https://academic.oup.com/nar/article/49/D1/D575/5912569?login=false), [merlin](https://academic.oup.com/nar/article/50/11/6052/6606174) and [gapseq](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-021-02295-1) (for gap-filling).
+Bottom-up approaches are the most common and most used reconstruction
+methodologies. They are comprised of a mapping of the genes to some sort
+of annotation/database that extracts the proteins and reactions they
+mediate/catalyze. Afterwards, they connect all the available reactions
+and establish a "mock-up" metabolic network (also known as a scaffold)
+and afterwards are curated to cover any missing reactions to the pathways.
+Generally speaking, they are extremely good for generating models in a
+manual/semi-automated way, but the more you automate them, the more the models
+tend to lose **quality**. If you want to maintain quality, the ammount of work
+needed to curate and fill the gaps exponentially increases. Examples of tools:
+[ModelSEED](https://academic.oup.com/nar/article/49/D1/D575/5912569?login=false)
+[@seaverModelSEEDBiochemistryDatabase2021], [merlin](https://academic.oup.com/nar/article/50/11/6052/6606174) [@capelaMerlinImprovedFramework2022] and
+[gapseq](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-021-022
+95-1) [@zimmermannGapseqInformedPrediction2021] (for gap-filling).
 
-On the other hand, top-down reconstructions use the the scaffolds generated in the first step and then compare them against a universal or complete model with all the available reactions in every pathway from a database and then extract the pathways they have. This methodology is much more effecient in generating larfge numbers of models without compromising on quality and needing manual curation, but bad for generating models for *de novo* genomes. One example of tools that utilize this approach is [CarveMe](https://pubmed.ncbi.nlm.nih.gov/30192979/).
+On the other hand, top-down reconstructions use the the scaffolds generated
+in the first step and then compare them against a universal or complete
+model with all the available reactions in every pathway from a database
+and then extract the pathways they have. This methodology is much more
+effecient in generating large numbers of models without compromising on
+quality and needing manual curation, but bad for generating models for
+*de novo* genomes. One example of tools that utilize this approach is
+[CarveMe](https://pubmed.ncbi.nlm.nih.gov/30192979/) [@machadoFastAutomatedReconstruction2018].
 
-![](gky537fig1.jpg)
+![**Source:** D. Machado et al, "Fast automated reconstruction of genome-scale metabolic models for microbial species and communities", Nucleic Acids Research, gky537, 2018. doi: https://doi.org/10.1093/nar/gky537](data/images/gky537fig1.jpg)
 
-**Source:** D. Machado et al, "Fast automated reconstruction of genome-scale metabolic models for microbial species and communities", Nucleic Acids Research, gky537, 2018. doi: https://doi.org/10.1093/nar/gky537
+## 2 - Model Definition
+
+The file type used to represent metabolic networks as GEMs is the Systems
+Biology Markup Language (SBML). To put it simply, these are XML files with
+specific notation and rules that allow the grouping and connection between
+**genes**, **reactions**, **metabolites** and their respective **units**. There
+are a large number of conventions and versions constantly being released to
+constantly make these models more updated and comprehensive. To see the specifications
+for each version see [here](https://sbml.org/documents/specifications/).
+
+Below is the example of a model for the central carbon metabolism of *E. coli*.
+It is faily small in size and is the most widely used model for educational
+purposes.
+
+```{python}
+#| echo: false
+
+!cat data/models/e_coli_core.xml
+
+```
+
+## 3 - Testing
+
+We will now test the *e_coli_cole* model by reading it and simulating microbial growth using **Flux-Balance Analysis (FBA)**:
+
+```{python}
+#| eval: false
+
+!carve --refseq GCF_000026305.1 -o data/models/ecoli_ed1a.xml -g M9 -i M9 -v
+
+``` 
+
+Now let's test the model!
+
 
 ```{python}
 
-!carve -h
+from reframed import load_cbmodel
+
+# Reading the model
+model = load_cbmodel('data/models/ecoli_ed1a.xml')
+
+# Summary of the model
+model.summary()
 
 ```
+
+# Simulation
+
+In this part:
+
+- You will learn how to perform flux balance analysis.
+- You will use the ReFramed python library for metabolic modeling. You can check the online documentation for more details.
+
+***
+
+## 1- Running the simulation
+
+The most simple thing you can do with a constraint-based model is to run a flux
+balance analysis (FBA) simulation. This simulation method uses a stoichiometric
+matrix to represent the metabolic network, where each row represents a
+metabolite and each column represents a reaction. Afterwards, it calculates the
+flow of metabolites in the network by solving a linear program with an objective
+function that normally points towards microbial growth or the production of a
+specific metabolite [@orthWhatFluxBalance2010].
+
+> **INFO:** The simulation is using the default objective function (biomass maximization) and environmental conditions (aerobic growth in M9 minimal medium with glucose) that came pre-defined in this model.
+
+```{python}
+
+from reframed import FBA
+
+solution = FBA(model)
+print(solution)
+    
+```
+
+```{python}
+
+solution.show_values(pattern="R_EX", sort=True)
+    
+```
+
+Questions to explore:
+
+- How realistic are these growth values? How can they be more accurate (if possible)?
+- Is *E. coli* growing at its maximum growth rate?
+
+## 2 - Visualizing fluxes
+
+Escher is a really nice tool for displaying fluxes in a metabolic map. It makes
+your life easier, especially when comparing flux distributions after performing
+some perturbations (such as gene deletions or changes in the growth medium).
+
+```{python}
+
+from reframed import fluxes2escher
+
+fluxes2escher(solution.values)
+
+```
+
+## 3 - Environment and growth media
+
+You can change growth conditions either by modifying the flux bounds of the reactions directly in the model or by supplying those constraints as an argument to the FBA simulation method.
+
+Let's observe what happens if we remove oxygen uptake to simulate anaerobic growth:
+
+```{python}
+
+solution2 = FBA(model, constraints={'R_EX_o2_e':0})
+print(solution2)
+    
+```
+
+```{python}
+
+solution2.show_values(pattern="R_EX", sort=True)
+    
+```
+
+As expected, *E. coli* switched to a fermentation mode, which resulted in the secretion of fermentation products and a decrease in growth rate.
+
+Again, we can see it better by displaying the flux distribution in a metabolic map.
+
+```{python}
+
+fluxes2escher(solution2.values)
+
+```
+## 4 - Comparing with experimental data
+
+In order to validade teh relevance of the usage of these methods, let's compare them with experimentally measured fluxes.
+
+Gerosa and co-workers[@gerosaPseudotransitionAnalysisIdentifies2015] have measured fluxes in E. coli growing with different carbon sources.
+
+![](data/images/gerosa2015.png)
+
+Let's load the fluxomics data that has been stored as a CSV file...
+
+```{python}
+
+import pandas as pd
+fluxomics = pd.read_csv('data/gerosa2015.csv', index_col=0)
+
+fluxomics.sample(5) # print 5 random entries
+    
+```
+
+We will constrain the model using only the respective uptake rate for each substrate and see how well it predicts the growth rate and all the other fluxes.
+
+Unfortunately, our model only contains 5 of the 8 substrates used in the paper.
+
+```{python}
+
+uptake_reactions = {
+    'Acetate': 'R_EX_ac_e',
+    'Fructose': 'R_EX_fru_e',
+    'Glucose': 'R_EX_glc__D_e',
+    'Pyruvate': 'R_EX_pyr_e',
+    'Succinate': 'R_EX_succ_e',
+}
+
+growth_rates = {
+    'Acetate': 0.29,
+    'Fructose': 0.49,
+    'Glucose': 0.65,
+    'Pyruvate': 0.39,
+    'Succinate': 0.51,
+}
+    
+```
+
+We need to remove glucose from the pre-defined medium, by setting the lower bound of the exchange reaction to zero:
+
+```{python}
+
+model.reactions.R_EX_glc__D_e.lb = 0
+    
+```
+
+Now let's run simulations for all the five conditions.
+
+```{python}
+
+simulated = {}
+print('Condition \tGrowth \tPredicted')
+
+for condition, rxn_id in uptake_reactions.items():
+    uptake_rate = fluxomics.loc[rxn_id, condition]
+    solution = FBA(model, constraints={rxn_id: uptake_rate})
+    simulated[f'{condition}_sim'] = solution.values
+    print(f'{condition} \t{growth_rates[condition]} \t{solution.fobj}')
+    
+combined = pd.concat([fluxomics, pd.DataFrame(simulated)], axis=1, join='inner')
+    
+```
+
+It seems that, in general, the model predicted higher growth rates than what was measured.
+
+> Why do you think this has happened?
+
+One of the limitations of FBA is that it does not predict overflow metabolism, unless we explicitly add additional constraints.
+
+So let's now additionally constrain the acetate secretion rate as well and see if our predictions improve.
+
+```{python}
+
+simulated = {}
+print('Condition \tGrowth \tPredicted')
+
+for condition, rxn_id in uptake_reactions.items():
+    constraints = {
+        rxn_id: fluxomics.loc[rxn_id, condition],
+        'R_EX_ac_e': fluxomics.loc['R_EX_ac_e', condition],
+    }
+    solution = FBA(model, constraints=constraints)
+    simulated[f'{condition}_sim'] = solution.values
+    print(f'{condition} \t{growth_rates[condition]} \t{solution.fobj}')
+    
+combined2 = pd.concat([fluxomics, pd.DataFrame(simulated)], axis=1, join='inner')
+    
+```
+
+There is some improvement in the prediction of growth rates. But what about the fluxes? How well are they predicted, and does this also improve when we constrain acetate secretion?
+
+The code below plots measured vs predicted fluxes, before and after constraining acetate secretion.
+
+```{python}
+
+import matplotlib.pyplot as plt
+
+fig, axs = plt.subplots(2, 5, figsize=(15, 6))
+
+for i, condition in enumerate(uptake_reactions):
+    combined.plot.scatter(condition, f'{condition}_sim', ax=axs[0,i])
+    axs[0,i].plot([-20, 20], [-20, 20], 'k--', alpha=0.3)
+    
+    combined2.plot.scatter(condition, f'{condition}_sim', ax=axs[1,i])
+    axs[1,i].plot([-20, 20], [-20, 20], 'k--', alpha=0.3)
+
+fig.tight_layout()
+    
+```
+
+
+## 5 - Extensions of models
+
+# Community Modeling
+
+In this part:
+
+- Learn
+- Build
+- Use
+- Analyze
+
+## 1 - Setting up
+
+## 2 - Simulation using FBA
+
+## 3 - Simulation using SteadyCom
+
+## 4 - Tradeoff problem
+
+# References
+
+::: {#refs}
+:::
