@@ -37,7 +37,7 @@ In this part:
 
 According to ChatGPT, metabolic network reconstruction is:
 
-"(...)a process where the complete set of metabolic reactions and pathways
+"(...) a process where the complete set of metabolic reactions and pathways
 in a microorganism, tissue, or organism are reconstructed and represented
 in a computational model based on its genomic data. This model provides a
 comprehensive framework for understanding the organism's metabolic network and
@@ -155,6 +155,9 @@ specific metabolite [@orthWhatFluxBalance2010].
 
 from reframed import FBA
 
+# Reading the model
+# model = load_cbmodel('data/models/e_coli_core.xml')
+
 solution = FBA(model)
 print(solution)
     
@@ -239,19 +242,25 @@ Unfortunately, our model only contains 5 of the 8 substrates used in the paper.
 ```{python}
 
 uptake_reactions = {
+    'Glucose': 'R_EX_glc__D_e',
+    'Gluconate': 'R_EX_glcn_e',
+    'Galactose': 'R_EX_gal_e',
+    'Pyruvate': 'R_EX_pyr_e',
+    'Glycerol': 'R_EX_glyc_e',
+    'Succinate': 'R_EX_succ_e',
     'Acetate': 'R_EX_ac_e',
     'Fructose': 'R_EX_fru_e',
-    'Glucose': 'R_EX_glc__D_e',
-    'Pyruvate': 'R_EX_pyr_e',
-    'Succinate': 'R_EX_succ_e',
 }
 
 growth_rates = {
+    'Glucose': 0.65,
+    'Gluconate': 0.59,
+    'Galactose': 0.18,
+    'Pyruvate': 0.39,
+    'Glycerol': 0.49,
+    'Succinate': 0.51,
     'Acetate': 0.29,
     'Fructose': 0.49,
-    'Glucose': 0.65,
-    'Pyruvate': 0.39,
-    'Succinate': 0.51,
 }
     
 ```
@@ -283,7 +292,7 @@ combined = pd.concat([fluxomics, pd.DataFrame(simulated)], axis=1, join='inner')
 
 It seems that, in general, the model predicted higher growth rates than what was measured.
 
-> Why do you think this has happened?
+> Why do you think this happened?
 
 One of the limitations of FBA is that it does not predict overflow metabolism, unless we explicitly add additional constraints.
 
@@ -315,7 +324,7 @@ The code below plots measured vs predicted fluxes, before and after constraining
 
 import matplotlib.pyplot as plt
 
-fig, axs = plt.subplots(2, 5, figsize=(15, 6))
+fig, axs = plt.subplots(2, 8, figsize=(15, 6))
 
 for i, condition in enumerate(uptake_reactions):
     combined.plot.scatter(condition, f'{condition}_sim', ax=axs[0,i])
