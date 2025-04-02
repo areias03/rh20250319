@@ -16,6 +16,25 @@
   keywords = {Body weight,Cell metabolism,Enzyme kinetics,Enzyme metabolism,Enzymes,Gene expression,Glucose metabolism,Protein metabolism}
 }
 
+@article{adadiPredictionMicrobialGrowth2012a,
+  title = {Prediction of {{Microbial Growth Rate}} versus {{Biomass Yield}} by a {{Metabolic Network}} with {{Kinetic Parameters}}},
+  author = {Adadi, Roi and Volkmer, Benjamin and Milo, Ron and Heinemann, Matthias and Shlomi, Tomer},
+  year = {2012},
+  month = jul,
+  journal = {PLOS Computational Biology},
+  volume = {8},
+  number = {7},
+  pages = {e1002575},
+  publisher = {Public Library of Science},
+  issn = {1553-7358},
+  doi = {10.1371/journal.pcbi.1002575},
+  urldate = {2025-04-02},
+  abstract = {Identifying the factors that determine microbial growth rate under various environmental and genetic conditions is a major challenge of systems biology. While current genome-scale metabolic modeling approaches enable us to successfully predict a variety of metabolic phenotypes, including maximal biomass yield, the prediction of actual growth rate is a long standing goal. This gap stems from strictly relying on data regarding reaction stoichiometry and directionality, without accounting for enzyme kinetic considerations. Here we present a novel metabolic network-based approach, MetabOlic Modeling with ENzyme kineTics (MOMENT), which predicts metabolic flux rate and growth rate by utilizing prior data on enzyme turnover rates and enzyme molecular weights, without requiring measurements of nutrient uptake rates. The method is based on an identified design principle of metabolism in which enzymes catalyzing high flux reactions across different media tend to be more efficient in terms of having higher turnover numbers. Extending upon previous attempts to utilize kinetic data in genome-scale metabolic modeling, our approach takes into account the requirement for specific enzyme concentrations for catalyzing predicted metabolic flux rates, considering isozymes, protein complexes, and multi-functional enzymes. MOMENT is shown to significantly improve the prediction accuracy of various metabolic phenotypes in E. coli, including intracellular flux rates and changes in gene expression levels under different growth rates. Most importantly, MOMENT is shown to predict growth rates of E. coli under a diverse set of media that are correlated with experimental measurements, markedly improving upon existing state-of-the art stoichiometric modeling approaches. These results support the view that a physiological bound on cellular enzyme concentrations is a key factor that determines microbial growth rate.},
+  langid = {english},
+  keywords = {Body weight,Cell metabolism,Enzyme kinetics,Enzyme metabolism,Enzymes,Gene expression,Glucose metabolism,Protein metabolism},
+  file = {/home/alexandre/Zotero/storage/NLF2CSJD/Adadi et al. - 2012 - Prediction of Microbial Growth Rate versus Biomass Yield by a Metabolic Network with Kinetic Paramet.pdf}
+}
+
 @article{agrenRAVENToolboxIts2013,
   title = {The {{RAVEN Toolbox}} and {{Its Use}} for {{Generating}} a {{Genome-scale Metabolic Model}} for {{Penicillium}} Chrysogenum},
   author = {Agren, Rasmus and Liu, Liming and Shoaie, Saeed and Vongsangnak, Wanwipa and Nookaew, Intawat and Nielsen, Jens},
@@ -222,6 +241,23 @@ Read\_Status\_Date: 2025-01-07T03:04:09.989Z},
   file = {/home/alexandre/Zotero/storage/NFYRYMJI/Baldini et al. - 2019 - The Microbiome Modeling Toolbox from microbial interactions to personalized microbial communities.pdf}
 }
 
+@article{bekiarisAutomaticConstructionMetabolic2020,
+  title = {Automatic Construction of Metabolic Models with Enzyme Constraints},
+  author = {Bekiaris, Pavlos Stephanos and Klamt, Steffen},
+  year = {2020},
+  month = jan,
+  journal = {BMC Bioinformatics},
+  volume = {21},
+  number = {1},
+  pages = {19},
+  issn = {1471-2105},
+  doi = {10.1186/s12859-019-3329-9},
+  urldate = {2025-04-02},
+  abstract = {In order to improve the accuracy of constraint-based metabolic models, several approaches have been developed which intend to integrate additional biological information. Two of these methods, MOMENT and GECKO, incorporate enzymatic (kcat) parameters and enzyme mass constraints to further constrain the space of feasible metabolic flux distributions. While both methods have been proven to deliver useful extensions of metabolic models, they may considerably increase size and complexity of the models and there is currently no tool available to fully automate generation and calibration of such enzyme-constrained models from given stoichiometric models.},
+  keywords = {Enzyme constraints,Escherichia coli,Flux balance analysis,Metabolic modeling,Minimal cut sets,Protein allocation,Proteomics},
+  file = {/home/alexandre/Zotero/storage/Y4PYTUT7/Bekiaris and Klamt - 2020 - Automatic construction of metabolic models with enzyme constraints.pdf;/home/alexandre/Zotero/storage/JNX43S65/s12859-019-3329-9.html}
+}
+
 @article{beuraMetagenomescaleCommunityMetabolic2022,
   title = {Metagenome-Scale Community Metabolic Modelling for Understanding the Role of Gut Microbiota in Human Health},
   author = {Beura, Satyajit and Kundu, Pritam and Das, Amit Kumar and Ghosh, Amit},
@@ -323,6 +359,22 @@ Read\_Status\_Date: 2025-01-07T03:04:00.525Z},
   annotation = {Read\_Status: To Read\\
 Read\_Status\_Date: 2025-01-07T03:16:38.821Z},
   file = {/home/alexandre/Zotero/storage/63MJ5HLR/Caivano et al. - 2023 - Enzyme-constrained metabolic model and in silico metabolic engineering of Clostridium ljungdahlii fo.pdf}
+}
+
+@article{caivanoEnzymeconstrainedMetabolicModel2023a,
+  title = {Enzyme-Constrained Metabolic Model and {\emph{in Silico}} Metabolic Engineering of {{{\emph{Clostridium}}}}{\emph{ Ljungdahlii}} for the Development of Sustainable Production Processes},
+  author = {Caivano, Antonio and {van Winden}, Wouter and Dragone, Giuliano and Mussatto, Solange I.},
+  year = {2023},
+  month = jan,
+  journal = {Computational and Structural Biotechnology Journal},
+  volume = {21},
+  pages = {4634--4646},
+  issn = {2001-0370},
+  doi = {10.1016/j.csbj.2023.09.015},
+  urldate = {2025-04-02},
+  abstract = {Constraint-based genome-scale models (GEMs) of microorganisms provide a powerful tool for predicting and analyzing microbial phenotypes as well as for understanding how these are affected by genetic and environmental perturbations. Recently, MATLAB and Python-based tools have been developed to incorporate enzymatic constraints into GEMs. These constraints enhance phenotype predictions by accounting for the enzyme cost of catalyzed model{\textasciiacute}s reactions, thereby reducing the space of possible metabolic flux distributions. In this study, enzymatic constraints were added to an existing GEM of Clostridium ljungdahlii, a model acetogenic bacterium, by including its enzyme turnover numbers (kcats) and molecular masses, using the Python-based AutoPACMEN approach. When compared to the metabolic model iHN637, the enzyme cost-constrained model (ec\_iHN637) obtained in our study showed an improved predictive ability of growth rate and product profile. The model ec\_iHN637 was then employed to perform in silico metabolic engineering of C. ljungdahlii, by using the OptKnock computational framework to identify knockouts to enhance the production of desired fermentation products. The in silico metabolic engineering was geared towards increasing the production of fermentation products by C. ljungdahlii, with a focus on the utilization of synthesis gas and CO2. This resulted in different engineering strategies for overproduction of valuable metabolites under different feeding conditions, without redundant knockouts for different products. Importantly, the results of the in silico engineering results indicated that the mixotrophic growth of C. ljungdahlii is a promising approach to coupling improved cell growth and acetate and ethanol productivity with net CO2 fixation.},
+  keywords = {Acetogenic bacteria,CO2 fixation,Flux balance analysis,Genome-scale model,Metabolic engineering,OptKnock},
+  file = {/home/alexandre/Zotero/storage/FZSJMV73/Caivano et al. - 2023 - Enzyme-constrained metabolic model and in silico metabolic engineering of Clostridium ljun.pdf;/home/alexandre/Zotero/storage/ZYRKN4YD/S2001037023003276.html}
 }
 
 @article{cammarotaGutMicrobiomeBig2020,
@@ -450,6 +502,26 @@ Read\_Status\_Date: 2025-01-10T04:18:00.487Z},
   annotation = {Read\_Status: To Read\\
 Read\_Status\_Date: 2025-01-15T00:06:47.824Z},
   file = {/home/alexandre/Zotero/storage/GEUX6YTC/Cheng et al. - 2023 - Machine learning for metabolic pathway optimization A review.pdf}
+}
+
+@article{chenReconstructionSimulationAnalysis2024,
+  title = {Reconstruction, Simulation and Analysis of Enzyme-Constrained Metabolic Models Using {{GECKO Toolbox}} 3.0},
+  author = {Chen, Yu and Gustafsson, Johan and Tafur Rangel, Albert and Anton, Mihail and Domenzain, Iv{\'a}n and Kittikunapong, Cheewin and Li, Feiran and Yuan, Le and Nielsen, Jens and Kerkhoven, Eduard J.},
+  year = {2024},
+  month = mar,
+  journal = {Nature Protocols},
+  volume = {19},
+  number = {3},
+  pages = {629--667},
+  publisher = {Nature Publishing Group},
+  issn = {1750-2799},
+  doi = {10.1038/s41596-023-00931-7},
+  urldate = {2025-04-02},
+  abstract = {Genome-scale metabolic models (GEMs) are computational representations that enable mathematical exploration of metabolic behaviors within cellular and environmental constraints. Despite their wide usage in biotechnology, biomedicine and fundamental studies, there are many phenotypes that GEMs are unable to correctly predict. GECKO is a method to improve the predictive power of a GEM by incorporating enzymatic constraints using kinetic and omics data. GECKO has enabled reconstruction of enzyme-constrained metabolic models (ecModels) for diverse organisms, which show better predictive performance than conventional GEMs. In this protocol, we describe how to use the latest version GECKO 3.0; the procedure has five stages: (1) expansion from a starting metabolic model to an ecModel structure, (2) integration of enzyme turnover numbers into the ecModel structure, (3) model tuning, (4) integration of proteomics data into the ecModel and (5) simulation and analysis of ecModels. GECKO 3.0 incorporates deep learning-predicted enzyme kinetics, paving the way for improved metabolic models for virtually any organism and cell line in the absence of experimental data. The time of running the whole protocol is organism dependent, e.g., {\textasciitilde}5 h for yeast.},
+  copyright = {2024 Springer Nature Limited},
+  langid = {english},
+  keywords = {Biochemical networks,Computational models,Machine learning,Metabolic engineering},
+  file = {/home/alexandre/Zotero/storage/KKKYY75Z/Chen et al. - 2024 - Reconstruction, simulation and analysis of enzyme-constrained metabolic models using GECKO Toolbox 3.pdf}
 }
 
 @article{chenRevealingMicrobiotaCharacteristics2024,
