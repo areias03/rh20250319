@@ -1,0 +1,926 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Introduction to Metabolic Modelling\"\n",
+        "subtitle: \"Centre for Microbiome Research - Queensland University of Technology\"\n",
+        "author: \"Alexandre Areias Castro\"\n",
+        "toc: true\n",
+        "bibliography: bibliography.bib\n",
+        "csl: https://www.zotero.org/styles/taylor-and-francis-national-library-of-medicine\n",
+        "---\n",
+        "\n",
+        "\n",
+        "***\n",
+        "In this tutorial:\n",
+        "\n",
+        "- You will learn several concepts and methods within metabolic modelling, including:\n",
+        "    - Network reconstruction;\n",
+        "    - Single-model simulations and extensions;\n",
+        "    - Community modelling.\n",
+        "- Use different tools and methodologies for each step;\n",
+        "- Make changes or add lines to existing code to observe changes in results. Use this as a sandbox and <u>explore</u>!\n"
+      ],
+      "id": "07ca3e8e"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import pandas as pd\n",
+        "import micom\n",
+        "import reframed"
+      ],
+      "id": "e32c5d2b",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Reconstruction and model building\n",
+        "\n",
+        "In this part:\n",
+        "\n",
+        "- How a metabolic model originates from a genome;\n",
+        "- The main types of reconstruction;\n",
+        "- What tools to use.\n",
+        "\n",
+        "***\n",
+        "\n",
+        "According to ChatGPT, metabolic network reconstruction is:\n",
+        "\n",
+        "\"(...) a process where the complete set of metabolic reactions and pathways\n",
+        "in a microorganism, tissue, or organism are reconstructed and represented\n",
+        "in a computational model based on its genomic data. This model provides a\n",
+        "comprehensive framework for understanding the organism's metabolic network and\n",
+        "can be used to simulate its behavior under various conditions.\"\n",
+        "\n",
+        "This is a fairly accurate answer. Now, let's look at how we can *actually* do this.\n",
+        "\n",
+        "## 1 - Introduction\n",
+        "\n",
+        "Metabolic reconstructions are achieved through essentially mapping genes,\n",
+        "reactions and metabolites into one cohesive and interconnected network known\n",
+        "as a **Genome-Scale Metabolic Model (GEM)**. In practical terms, it requires us to\n",
+        "obtain as much information from the genomic data so that through it, we can know\n",
+        "which reactions are related to each of the genes present in the genome. The way\n",
+        "we obtain this information is accomplised using 2 main approaches:\n",
+        "\n",
+        "- Bottom-up\n",
+        "- Top-down\n",
+        "\n",
+        "Bottom-up approaches are the most common and most used reconstruction\n",
+        "methodologies. They are comprised of a mapping of the genes to some sort\n",
+        "of annotation/database that extracts the proteins and reactions they\n",
+        "mediate/catalyze. Afterwards, they connect all the available reactions\n",
+        "and establish a \"mock-up\" metabolic network (also known as a scaffold)\n",
+        "and afterwards are curated to cover any missing reactions to the pathways.\n",
+        "Generally speaking, they are extremely good for generating models in a\n",
+        "manual/semi-automated way, but the more you automate them, the more the models\n",
+        "tend to lose **quality**. If you want to maintain quality, the ammount of work\n",
+        "needed to curate and fill the gaps exponentially increases. Examples of tools:\n",
+        "[ModelSEED](https://academic.oup.com/nar/article/49/D1/D575/5912569?login=false)\n",
+        "[@seaverModelSEEDBiochemistryDatabase2021], [merlin](https://academic.oup.com/nar/article/50/11/6052/6606174) [@capelaMerlinImprovedFramework2022] and\n",
+        "[gapseq](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-021-022\n",
+        "95-1) [@zimmermannGapseqInformedPrediction2021] (for gap-filling).\n",
+        "\n",
+        "On the other hand, top-down reconstructions use the the scaffolds generated\n",
+        "in the first step and then compare them against a universal or complete\n",
+        "model with all the available reactions in every pathway from a database\n",
+        "and then extract the pathways they have. This methodology is much more\n",
+        "effecient in generating large numbers of models without compromising on\n",
+        "quality and needing manual curation, but bad for generating models for\n",
+        "*de novo* genomes. One example of tools that utilize this approach is\n",
+        "[CarveMe](https://pubmed.ncbi.nlm.nih.gov/30192979/) [@machadoFastAutomatedReconstruction2018].\n",
+        "\n",
+        "![**Source:** Machado D, Andrejev S, Tramontano M, et al. Fast automated reconstruction of genome-scale metabolic models for microbial species and communities. Nucleic Acids Research. 2018;46(15):7542–7553.](data/images/gky537fig1.jpg)\n",
+        "\n",
+        "## 2 - Model Definition\n",
+        "\n",
+        "The file type used to represent metabolic networks as GEMs is the Systems\n",
+        "Biology Markup Language (SBML). To put it simply, these are XML files with\n",
+        "specific notation and rules that allow the grouping and connection between\n",
+        "**genes**, **reactions**, **metabolites** and their respective **units**. There\n",
+        "are a large number of conventions and versions constantly being released to\n",
+        "constantly make these models more updated and comprehensive. To see the specifications\n",
+        "for each version see [here](https://sbml.org/documents/specifications/).\n",
+        "\n",
+        "Below is the example of a model for the central carbon metabolism of *E. coli*.\n",
+        "It is faily small in size and is the most widely used model for educational\n",
+        "purposes.\n"
+      ],
+      "id": "d1f1b440"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| echo: false\n",
+        "\n",
+        "!cat data/models/e_coli_core.xml"
+      ],
+      "id": "8b002389",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## 3 - Testing\n",
+        "\n",
+        "We will now test the *e_coli_cole* model by reading it and simulating microbial growth using **Flux-Balance Analysis (FBA)**:\n"
+      ],
+      "id": "52eeba46"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| eval: false\n",
+        "\n",
+        "!carve --refseq GCF_000026305.1 -o data/models/ecoli_ed1a.xml -g M9 -i M9 -v"
+      ],
+      "id": "f865ae3d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Now let's test the model!\n"
+      ],
+      "id": "aff80350"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "from reframed import load_cbmodel\n",
+        "\n",
+        "# Reading the model\n",
+        "model = load_cbmodel('data/models/ecoli_ed1a.xml')\n",
+        "\n",
+        "# Summary of the model\n",
+        "model.summary()"
+      ],
+      "id": "d35ea2ce",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Simulation\n",
+        "\n",
+        "In this part:\n",
+        "\n",
+        "- You will learn how to perform flux balance analysis.\n",
+        "- You will use the ReFramed python library for metabolic modeling. You can check the online documentation for more details.\n",
+        "\n",
+        "***\n",
+        "\n",
+        "## 1- Running the simulation\n",
+        "\n",
+        "The most simple thing you can do with a constraint-based model is to run a flux\n",
+        "balance analysis (FBA) simulation. This simulation method uses a stoichiometric\n",
+        "matrix to represent the metabolic network, where each row represents a\n",
+        "metabolite and each column represents a reaction. Afterwards, it calculates the\n",
+        "flow of metabolites in the network by solving a linear program with an objective\n",
+        "function that normally points towards microbial growth or the production of a\n",
+        "specific metabolite [@orthWhatFluxBalance2010].\n",
+        "\n",
+        "> **INFO:** The simulation is using the default objective function (biomass maximization) and environmental conditions (aerobic growth in M9 minimal medium with glucose) that came pre-defined in this model.\n"
+      ],
+      "id": "89519d40"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "from reframed import FBA\n",
+        "\n",
+        "solution = FBA(model)\n",
+        "print(solution)\n"
+      ],
+      "id": "06b86899",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "solution.show_values(pattern=\"R_EX\", sort=True)\n"
+      ],
+      "id": "c7c19077",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Questions to explore:\n",
+        "\n",
+        "- How realistic are these growth values? How can they be more accurate (if possible)?\n",
+        "- Is *E. coli* growing at its maximum growth rate?\n",
+        "\n",
+        "## 2 - Visualizing fluxes\n",
+        "\n",
+        "Escher is a really nice tool for displaying fluxes in a metabolic map. It makes\n",
+        "your life easier, especially when comparing flux distributions after performing\n",
+        "some perturbations (such as gene deletions or changes in the growth medium).\n"
+      ],
+      "id": "8ca7c7fa"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "from reframed import fluxes2escher\n",
+        "\n",
+        "fluxes2escher(solution.values)"
+      ],
+      "id": "e4939fd4",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## 3 - Environment and growth media\n",
+        "\n",
+        "You can change growth conditions either by modifying the flux bounds of the reactions directly in the model or by supplying those constraints as an argument to the FBA simulation method.\n",
+        "\n",
+        "Let's observe what happens if we remove oxygen uptake to simulate anaerobic growth:\n"
+      ],
+      "id": "c03812a6"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "solution2 = FBA(model, constraints={'R_EX_o2_e':0})\n",
+        "print(solution2)\n"
+      ],
+      "id": "40268be5",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "solution2.show_values(pattern=\"R_EX\", sort=True)\n"
+      ],
+      "id": "ab162bd3",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "As expected, *E. coli* switched to a fermentation mode, which resulted in the secretion of fermentation products and a decrease in growth rate.\n",
+        "\n",
+        "Again, we can see it better by displaying the flux distribution in a metabolic map.\n"
+      ],
+      "id": "d96ee0f3"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "fluxes2escher(solution2.values)"
+      ],
+      "id": "ce589935",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## 4 - Comparing with experimental data\n",
+        "\n",
+        "In order to validade the relevance of the usage of these methods, let's compare them with experimentally measured fluxes.\n",
+        "\n",
+        "Gerosa and co-workers[@gerosaPseudotransitionAnalysisIdentifies2015] have measured fluxes in E. coli growing with different carbon sources.\n",
+        "\n",
+        "![](data/images/gerosa2015.png)\n",
+        "\n",
+        "Let's load the fluxomics data that has been stored as a CSV file...\n"
+      ],
+      "id": "a5e5805c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import pandas as pd\n",
+        "fluxomics = pd.read_csv('data/gerosa2015.csv', index_col=0)\n",
+        "\n",
+        "fluxomics.sample(5) # print 5 random entries\n"
+      ],
+      "id": "7e25917c",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "We will constrain the model using only the respective uptake rate for each substrate and see how well it predicts the growth rate and all the other fluxes.\n",
+        "\n",
+        "Unfortunately, our model only contains 5 of the 8 substrates used in the paper.\n"
+      ],
+      "id": "347b3b6f"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "uptake_reactions = {\n",
+        "    'Glucose': 'R_EX_glc__D_e',\n",
+        "    'Gluconate': 'R_EX_glcn_e',\n",
+        "    'Galactose': 'R_EX_gal_e',\n",
+        "    'Pyruvate': 'R_EX_pyr_e',\n",
+        "    'Glycerol': 'R_EX_glyc_e',\n",
+        "    'Succinate': 'R_EX_succ_e',\n",
+        "    'Acetate': 'R_EX_ac_e',\n",
+        "    'Fructose': 'R_EX_fru_e',\n",
+        "}\n",
+        "\n",
+        "growth_rates = {\n",
+        "    'Glucose': 0.65,\n",
+        "    'Gluconate': 0.59,\n",
+        "    'Galactose': 0.18,\n",
+        "    'Pyruvate': 0.39,\n",
+        "    'Glycerol': 0.49,\n",
+        "    'Succinate': 0.51,\n",
+        "    'Acetate': 0.29,\n",
+        "    'Fructose': 0.49,\n",
+        "}\n"
+      ],
+      "id": "5099a08d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "We need to remove glucose from the pre-defined medium, by setting the lower bound of the exchange reaction to zero:\n"
+      ],
+      "id": "d63ba2bc"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "model.reactions.R_EX_glc__D_e.lb = 0\n"
+      ],
+      "id": "457db7ab",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Now let's run simulations for all the five conditions.\n"
+      ],
+      "id": "19b06a3b"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "simulated = {}\n",
+        "print('Condition \\tGrowth \\tPredicted')\n",
+        "\n",
+        "for condition, rxn_id in uptake_reactions.items():\n",
+        "    uptake_rate = fluxomics.loc[rxn_id, condition]\n",
+        "    solution = FBA(model, constraints={rxn_id: uptake_rate})\n",
+        "    simulated[f'{condition}_sim'] = solution.values\n",
+        "    print(f'{condition} \\t{growth_rates[condition]} \\t{solution.fobj}')\n",
+        "    \n",
+        "combined = pd.concat([fluxomics, pd.DataFrame(simulated)], axis=1, join='inner')\n"
+      ],
+      "id": "950eda7c",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "It seems that, in general, the model predicted similar growth rates to those that were measured.\n",
+        "\n",
+        "> Why do you think this happened?\n",
+        "\n",
+        "Now let's look at the same procedure with the *e_coli_core* model. Before that, we will have to reduce the number of carbon sources from 8 to 5 to accomodate the available exchange reactions in the model.\n"
+      ],
+      "id": "5b2044d4"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "uptake_reactions = {\n",
+        "    'Glucose': 'R_EX_glc__D_e',\n",
+        "    'Pyruvate': 'R_EX_pyr_e',\n",
+        "    'Succinate': 'R_EX_succ_e',\n",
+        "    'Acetate': 'R_EX_ac_e',\n",
+        "    'Fructose': 'R_EX_fru_e',\n",
+        "}\n",
+        "\n",
+        "growth_rates = {\n",
+        "    'Glucose': 0.65,\n",
+        "    'Pyruvate': 0.39,\n",
+        "    'Succinate': 0.51,\n",
+        "    'Acetate': 0.29,\n",
+        "    'Fructose': 0.49,\n",
+        "}\n"
+      ],
+      "id": "40cfd038",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Reading the model\n",
+        "model = load_cbmodel('data/models/e_coli_core.xml')\n",
+        "\n",
+        "model.reactions.R_EX_glc__D_e.lb = 0\n",
+        "\n",
+        "simulated = {}\n",
+        "print('Condition \\tGrowth \\tPredicted')\n",
+        "\n",
+        "for condition, rxn_id in uptake_reactions.items():\n",
+        "    uptake_rate = fluxomics.loc[rxn_id, condition]\n",
+        "    solution = FBA(model, constraints={rxn_id: uptake_rate})\n",
+        "    simulated[f'{condition}_sim'] = solution.values\n",
+        "    print(f'{condition} \\t{growth_rates[condition]} \\t{solution.fobj}')\n",
+        "    \n",
+        "combined = pd.concat([fluxomics, pd.DataFrame(simulated)], axis=1, join='inner')\n"
+      ],
+      "id": "e67fc9a8",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Now we observe that overall, the model predicted higher growth rates than what was measured.\n",
+        "\n",
+        "> How can we explain the differences? What could be the variables at play here?\n",
+        "\n",
+        "One of the limitations of FBA is that it does not predict overflow metabolism, unless we explicitly add additional constraints.\n",
+        "\n",
+        "So let's now additionally constrain the acetate secretion rate as well and see if our predictions improve.\n"
+      ],
+      "id": "a3d28b7d"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "simulated = {}\n",
+        "print('Condition \\tGrowth \\tPredicted')\n",
+        "\n",
+        "for condition, rxn_id in uptake_reactions.items():\n",
+        "    constraints = {\n",
+        "        rxn_id: fluxomics.loc[rxn_id, condition],\n",
+        "        'R_EX_ac_e': fluxomics.loc['R_EX_ac_e', condition],\n",
+        "    }\n",
+        "    solution = FBA(model, constraints=constraints)\n",
+        "    simulated[f'{condition}_sim'] = solution.values\n",
+        "    print(f'{condition} \\t{growth_rates[condition]} \\t{solution.fobj}')\n",
+        "    \n",
+        "combined2 = pd.concat([fluxomics, pd.DataFrame(simulated)], axis=1, join='inner')\n"
+      ],
+      "id": "72763ded",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "There is some improvement in the prediction of growth rates. But what about the fluxes? How well are they predicted, and does this also improve when we constrain acetate secretion?\n",
+        "\n",
+        "The  plots below represent the measured vs predicted fluxes, before and after constraining acetate secretion.\n"
+      ],
+      "id": "32b3ba2e"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import matplotlib.pyplot as plt\n",
+        "\n",
+        "fig, axs = plt.subplots(2, 5, figsize=(15, 6))\n",
+        "\n",
+        "for i, condition in enumerate(uptake_reactions):\n",
+        "    combined.plot.scatter(condition, f'{condition}_sim', ax=axs[0,i])\n",
+        "    axs[0,i].plot([-20, 20], [-20, 20], 'k--', alpha=0.3)\n",
+        "    \n",
+        "    combined2.plot.scatter(condition, f'{condition}_sim', ax=axs[1,i])\n",
+        "    axs[1,i].plot([-20, 20], [-20, 20], 'k--', alpha=0.3)\n",
+        "\n",
+        "fig.tight_layout()\n"
+      ],
+      "id": "98f84b05",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "<!-- ## 5 - Extensions of models -->\n",
+        "\n",
+        "<!-- As you might have understood by now, the secret to accurate predictions lies in the constraints applied to the system. That is because by doing so, we reduce the **solution space** to the point where the predicted fluxes are extremely accurate. -->\n",
+        "\n",
+        "<!-- ![**Source:** Orth JD, Thiele I, Palsson BØ. What is flux balance analysis? Nature biotechnology. 2010;28(3):245–248.](data/images/solution_space.png) -->\n",
+        "\n",
+        "<!-- However, how do we reduce the solution space **and** shift it towards real flux values? -->\n",
+        "\n",
+        "<!-- Currently we have 2 main options: -->\n",
+        "\n",
+        "<!-- - We comprehensively define the growth media with highly precise fluxes -->\n",
+        "<!-- - We integrate omics data into the model -->\n",
+        "\n",
+        "<!-- Defining a really accurate growth media is extremely dificult. First, because converting metabolite concentration into uptake fluxes is next to impossible. Therefore, most advances in this area have been towards extending and enhancing the models with various omics data. -->\n",
+        "\n",
+        "<!-- There are currently a few tools that automatically integrate omics (mainly enzymatic/proteomics data) into a model. These processes generate what is commonly known as a **enzyme-constrained Genome-Scale Metabolic Model (ecGEM)**, with some small variances in both the process and the outcome. Some of the main tools and workflows are [ECMpy](https://github.com/tibbdc/ECMpy)[@maoECMpySimplifiedWorkflow2022], [GECKO](https://github.com/SysBioChalmers/GECKO/)[@chenReconstructionSimulationAnalysis2024], MOMENT[@adadiPredictionMicrobialGrowth2012] (sMOMENT->[AutoPACMEN](https://github.com/klamt-lab/autopacmen))[@bekiarisAutomaticConstructionMetabolic2020] and my own published on [GitHub](https://github.com/areias03/tmcom). -->\n",
+        "<!-- The process consists of 5 main stages: -->\n",
+        "\n",
+        "<!-- 1. Expansion from a starting metabolic model to an ecModel structure -->\n",
+        "<!-- 2. Integration of enzyme turnover numbers into the ecModel structure -->\n",
+        "<!-- 3. Model tuning (or calibration) -->\n",
+        "<!-- 4. Integration of proteomics data into the ecModel -->\n",
+        "<!-- 5. Simulation and analysis of ecModels -->\n",
+        "\n",
+        "<!-- Due to the complexity of the process, and mainly, our own time constraints we will just use a model generated by one of them, in this case the ... methodology -->\n",
+        "\n",
+        "\n",
+        "# Community Modeling\n",
+        "\n",
+        "In this part:\n",
+        "\n",
+        "- Build models for artificial communities\n",
+        "- Use the [MEWpy]() library for metabolic modelling. You can also read the documentation [here]().\n",
+        "- Analyze interactions and results from different simulation methods.\n",
+        "\n",
+        "## 1 - Setting up\n",
+        "\n",
+        "We will create a synthetic microbial consortium with two *E. coli* mutants growing in minimal medium. In one of the mutants we will knockout the glucose transporter and in the other we will knockout the ammonium transporter.\n"
+      ],
+      "id": "43ab0d75"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "from reframed import load_cbmodel\n",
+        "wildtype = load_cbmodel('data/models/e_coli_core.xml')"
+      ],
+      "id": "476c17b0",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Now we create our two mutants (`glc_ko` and `nh4_ko`):\n"
+      ],
+      "id": "9d6f1b48"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "glc_ko = wildtype.copy()\n",
+        "glc_ko.id = 'glc_ko'\n",
+        "glc_ko.set_flux_bounds('R_GLCpts', 0, 0)"
+      ],
+      "id": "403a35b5",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "nh4_ko = wildtype.copy()\n",
+        "nh4_ko.id = 'nh4_ko'\n",
+        "nh4_ko.set_flux_bounds('R_NH4t', 0, 0)"
+      ],
+      "id": "5fa0d08c",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Comparing models\n",
+        "\n",
+        "Community models require that metabolites have the same identifiers across all models. MEWpy offers some functions tho that end, computing the metabolites, reactions and uptakes overlaps between a list models.\n"
+      ],
+      "id": "9d716cb1"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "from mewpy.com import *\n",
+        "mets, rxns, over = jaccard_similarity_matrices([glc_ko, nh4_ko])"
+      ],
+      "id": "3669a810",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "mets"
+      ],
+      "id": "50459b2d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "rxns"
+      ],
+      "id": "93128059",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "over"
+      ],
+      "id": "6429126f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Building communities\n",
+        "\n",
+        "MEWpy has some basic functionality for working with microbial communities, one is the `CommunityModel` class to create microbial communities from a list of models of individual species:\n"
+      ],
+      "id": "8d9a7cfc"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "from reframed import Community\n",
+        "community = Community('ecoli_pair', [glc_ko, nh4_ko])"
+      ],
+      "id": "6cd101ec",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "This community model ignores the environmental conditions that were specified in the original models (since these could be very different).\n",
+        "\n",
+        "To make our life easier, we will extract the nutrient composition specified in the wild-type model to use later.\n"
+      ],
+      "id": "78db7a49"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "from reframed import Environment\n",
+        "\n",
+        "M9 = Environment.from_model(wildtype)\n",
+        "\n",
+        "print(f\"Environment compounds: {', '.join(M9.get_compounds())}\")"
+      ],
+      "id": "ad85b7f2",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## 2 - Simulation using FBA\n",
+        "\n",
+        "A very simple way to simulate a microbial community is to merge the individual models into a single model that mimics a \"super organism\", where each microbe lives inside its own compartment, and run a (conventional) FBA simulation for this super organism.\n"
+      ],
+      "id": "5f2c67a1"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "from reframed import FBA\n",
+        "\n",
+        "super_oganism = community.merged_model\n",
+        "solution = FBA(super_oganism, constraints=M9)\n",
+        "\n",
+        "print(solution)\n",
+        "solution.show_values(pattern='R_EX')"
+      ],
+      "id": "3e00e5e8",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "We can see that the model predicts a growth rate (total biomass per hour) similar to the wild-type, with an efficient consumption of glucose and ammonia that results in respiratory metabolism.\n",
+        "\n",
+        "But what is each organism doing, and are both organisms actually growing at the same rate?\n"
+      ],
+      "id": "7d3a1e20"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "solution.show_values(pattern='BIOMASS', sort=True)"
+      ],
+      "id": "b0461ebd",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Let's print the all non null fluxes by organism:\n"
+      ],
+      "id": "a32c3442"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "solution.show_values(pattern='_glc_ko', sort=True)"
+      ],
+      "id": "262feae1",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "solution.show_values(pattern='_nh4_ko', sort=True)"
+      ],
+      "id": "316a9668",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Actually it seems that only one of the organisms is growing while the other has an active metabolism (it exchanges metabolites with the environment and with the other organism) performing the role of a bioconverter, but none of the flux is used for growth.\n",
+        "\n",
+        "> Do you think this would be a stable consortium ?\n",
+        "\n",
+        "\n",
+        "## 3 - Simulation using SteadyCom\n",
+        "\n",
+        "SteadyCom[@chanSteadyComPredictingMicrobial2017] is a recent community simulation method that takes into account the fact that to reach a stable composition the organisms need to grow at the same specific growth rate (1/h), which means that the absolute growth rate (gDW/h) of each organism is proportional to its abundance at steady-state (gDW).\n",
+        "\n",
+        "Let's simulate the same community using SteadyCom:\n"
+      ],
+      "id": "ae371440"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "from reframed import SteadyCom\n",
+        "steady= SteadyCom(community, constraints=M9, solver = 'cplex')"
+      ],
+      "id": "eb1f8492",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "In this case the solution object shows the overall community growth rate and the relative abundance of each species:\n"
+      ],
+      "id": "0dbb8796"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "print(steady)"
+      ],
+      "id": "52ca10ae",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The `solution` object for community simulations implements a few additional features, such as enumerating all the cross-feeding interactions:\n"
+      ],
+      "id": "cf634e3c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "steady.cross_feeding(as_df=True).dropna().sort_values('rate', ascending=False)"
+      ],
+      "id": "996bf5c8",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "We can plot the fluxes of each mutant in a map to help with interpretation of the results:\n"
+      ],
+      "id": "32341122"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "fluxes2escher(steady.internal['glc_ko'])"
+      ],
+      "id": "f3be22f6",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "fluxes2escher(steady.internal['nh4_ko'])"
+      ],
+      "id": "bb070383",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## 4 - Explore alternative solutions\n",
+        "\n",
+        "## 5 - Interaction Analysis (SMETANA)\n",
+        "\n",
+        "# References\n",
+        "\n",
+        "::: {#refs}\n",
+        ":::"
+      ],
+      "id": "23776e60"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "/home/alexandre/miniconda3/envs/mtgw/share/jupyter/kernels/python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
